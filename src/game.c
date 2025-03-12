@@ -1,0 +1,288 @@
+#include "../include/game.h"
+#include "../include/tetrominoe.h"
+#include "../include/buf.h"
+#include "../include/grid.h"
+#include "../include/utils.h"
+#include "../include/constants.h"
+// #include "../include/logger.h"
+#include "../include/screen.h"
+#include <time.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/select.h>
+
+
+
+tetrominoe_t curr_tetrominoe;
+tetrominoe_t shadow_tetrominoe;
+int score;
+
+void fall() {
+    for(int i=0; ; i++) {
+        // ctrl-Q for quit
+        char c = '\0';
+        if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) 
+          die("read");
+        if (c == _CTRL('q')) {
+            write(STDOUT_FILENO, "\x1b[2J", 4); 
+            write(STDERR_FILENO, "\x1b[1;1H", 7);
+            exit(0);
+        }
+
+
+        int i, stime;
+        long ltime;
+        ltime = time(NULL);
+        stime = (unsigned) ltime/2;
+        srand(stime);
+        int type = rand() % 7; 
+        // printf("type: %d\n", type);
+        curr_tetrominoe = create_tetrominoe(type);
+
+        while (can_move_down(&curr_tetrominoe)) {            
+            process();
+
+            for (int j = 0; j < 50; j++) {
+                struct timeval tv = {0, 10000};
+                fd_set read_fds;
+                FD_ZERO(&read_fds);
+                FD_SET(STDIN_FILENO, &read_fds);
+
+                if (select(STDIN_FILENO + 1, &read_fds, NULL, NULL, &tv) > 0) {
+                    char buffer[64];
+                    int n = read(STDIN_FILENO, buffer, sizeof(buffer));
+            
+                    if (n == 1 && buffer[0] == _CTRL('q')) exit(0);
+                    if (n == 3 && buffer[0] == '\x1B' && buffer[1] == '[') {
+                        switch (buffer[2]) {
+                            case 'D': move_left(); break;
+                            case 'C': move_right(); break;
+                            case 'B': drop_fast(); break;
+                        }
+                    }
+
+                    process();        
+                }
+            }
+        }
+
+        update_grid();
+
+        clear_full_rows();
+    }
+}
+
+void process() {
+    if (can_move_down(&curr_tetrominoe)) {
+        erase_previous_position();
+
+        for (int i = 0; i < 4; i++) {
+            curr_tetrominoe.points[i].y += 1;
+        }
+    }
+
+    shadow();
+
+    buf_t draw_buf = {NULL, 0};
+
+    // color the tetromino
+    append_buf(&draw_buf, curr_tetrominoe.color, strlen(curr_tetrominoe.color));
+    
+
+    // draw the tetromino itself
+    for (int i = 0; i < 4; i++) {
+        move_cursor(curr_tetrominoe.points[i].x, curr_tetrominoe.points[i].y, &draw_buf);
+        append_buf(&draw_buf, BLOCK_CHAR, 4);
+    }
+    // reset color
+    append_buf(&draw_buf, RESET, 4);
+
+    write(STDOUT_FILENO, draw_buf.buf, draw_buf.len);
+    free_buf(&draw_buf);
+}
+
+void erase_previous_position() {
+    buf_t buf = {NULL, 0};
+    for (int i = 0; i < 4; i++) {
+        move_cursor(curr_tetrominoe.points[i].x, curr_tetrominoe.points[i].y, &buf);
+        append_buf(&buf, " ", 1);
+    }
+    write(STDOUT_FILENO, buf.buf, buf.len);
+    free_buf(&buf);
+}
+
+void move_left() {
+    for (int i = 0; i < 4; i++) {
+        if (is_valid_point(curr_tetrominoe.points[i].x - 1, curr_tetrominoe.points[i].y) == 0) return;
+    }
+
+    erase_previous_position();
+
+    for (int i = 0; i < 4; i++) {
+        curr_tetrominoe.points[i].x -= 1;
+    }
+}
+
+void move_right() {
+    for (int i = 0; i < 4; i++) {
+        if (is_valid_point(curr_tetrominoe.points[i].x + 1, curr_tetrominoe.points[i].y) == 0) return;
+    }
+
+    erase_previous_position();
+
+    for (int i = 0; i < 4; i++) {
+        curr_tetrominoe.points[i].x += 1;
+    }
+}
+
+void drop_fast() {
+    for (int i=0; i<2 && can_move_down(&curr_tetrominoe); i++) {   // make the drop faster by increasing the loop count
+        
+        erase_previous_position();
+
+
+        for (int i = 0; i < 4; i++) {
+            curr_tetrominoe.points[i].y += 1;
+        }
+    }
+}
+
+
+int can_move_down(tetrominoe_t *tetrominoe) {
+    for (int i = 0; i < 4; i++) {
+        int new_y = tetrominoe->points[i].y + 1;
+        int x_index , y_index;
+        get_index_in_grid(tetrominoe->points[i].x, new_y, &x_index, &y_index);
+        if (new_y >= grid.bottom_right.y || grid.cells[y_index][x_index] == 1) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void update_grid() {
+    for (int i = 0; i < 4; i++) {
+        int x , y;
+        get_index_in_grid(curr_tetrominoe.points[i].x, curr_tetrominoe.points[i].y, &x, &y);
+        grid.cells[y][x] = 1;
+        grid.colors[y][x] = curr_tetrominoe.color;
+    }
+}
+
+void clear_full_rows() {
+    for (int y = 0; y < grid.height; y++) {
+        int full = 1;
+        for (int x = 0; x < grid.width; x++) {
+            if (grid.cells[y][x] == 0) {
+                full = 0;
+                break;
+            }
+        }
+        if (full) {
+
+            // increase the score
+            increase_score();
+
+            // Shift everything down straight above the full row
+            for (int r = y; r > 0; r--) {
+                for (int c = 0; c < grid.width; c++) {
+                    grid.cells[r][c] = grid.cells[r - 1][c];
+                }
+            }
+
+            // Clear the top row
+            for (int c = 0; c < grid.width; c++) {
+                grid.cells[0][c] = 0;
+            }
+
+            buf_t buf = {NULL, 0};
+
+            append_buf(&buf, grid.colors[y], strlen(grid.colors[y]));
+            for (int r = 0; r < grid.height; r++) {
+                for (int c = 0; c < grid.width; c++) {
+                    if (grid.cells[r][c] == 1) {
+                        move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
+                        append_buf(&buf, BLOCK_CHAR, 4);
+                    } else {
+                        move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
+                        append_buf(&buf, " ", 1);
+                    }
+                }
+            }
+
+            // reset color
+            append_buf(&buf, RESET, 4);
+            write(STDOUT_FILENO, buf.buf, buf.len);
+            free_buf(&buf);
+        }
+    }
+}
+
+void increase_score() {
+    score++;
+
+
+    buf_t buf = {NULL, 0};
+    move_cursor(0, screen_height - 1, &buf);
+
+    append_buf(&buf, "\033[2K", 4); // Clear line
+
+
+
+    char score_str[32];
+    sprintf(score_str, "Score: %d", score);
+    append_buf(&buf, score_str, strlen(score_str));
+
+    write(STDOUT_FILENO, buf.buf, buf.len);
+    free_buf(&buf);
+}
+
+void shadow() {
+    // delete the previous shadow
+    // but first ensure the shadow is not null
+    buf_t buf = {NULL, 0};
+    if (shadow_tetrominoe.points[0].x && shadow_tetrominoe.points[0].y) {
+
+        for (int i = 0; i < 4; i++) {
+            // check if the pre shadow becaome a block
+            int x_index, y_index;
+            get_index_in_grid(shadow_tetrominoe.points[i].x, shadow_tetrominoe.points[i].y, &x_index, &y_index);
+            if (grid.cells[y_index][x_index] == 0) {
+                move_cursor(shadow_tetrominoe.points[i].x, shadow_tetrominoe.points[i].y, &buf);
+                append_buf(&buf, " ", 1);
+            }
+        }
+        write(STDOUT_FILENO, buf.buf, buf.len);
+        free_buf(&buf);
+    }
+
+
+
+    // create a new shadow
+    shadow_tetrominoe = curr_tetrominoe;   
+    
+    while (can_move_down(&shadow_tetrominoe)) {
+        for (int i = 0; i < 4; i++) {
+            shadow_tetrominoe.points[i].y += 1;
+        }
+    }
+
+    buf = (buf_t) {NULL, 0};
+
+    // color the tetromino
+    append_buf(&buf, curr_tetrominoe.color, strlen(curr_tetrominoe.color));
+
+    // draw the tetromino itself
+    for (int i = 0; i < 4; i++) {
+        move_cursor(shadow_tetrominoe.points[i].x, shadow_tetrominoe.points[i].y, &buf);
+        append_buf(&buf, SHADE_CHAR, 4);
+    }
+    // reset color
+    append_buf(&buf, RESET, 4);
+
+    write(STDOUT_FILENO, buf.buf, buf.len);
+    free_buf(&buf);
+}
