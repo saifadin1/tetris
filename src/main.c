@@ -13,7 +13,7 @@ int main(void) {
     atexit(raw_mode_off);
 
     set_up_screen();
-	init_grid(10, 20);
+	init_grid(10 + 2, 20 + 1);
     while (1) {
         draw_board();
 		fall();

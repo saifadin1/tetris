@@ -20,7 +20,7 @@ void get_index_in_grid(int x, int y, int *new_x, int *new_y) {
 int is_valid_point(int x, int y) {
     int new_x, new_y;
     get_index_in_grid(x, y, &new_x, &new_y);
-    if (new_x < 0 || new_x >= grid.width || new_y < 0 || new_y >= grid.height || grid.cells[new_y][new_x] == 1) {
+    if (new_x < 0 || new_x >= grid.width - 2 || new_y < 0 || new_y >= grid.height || grid.cells[new_y][new_x] == 1) {
         return 0;
     }
     return 1;

@@ -45,7 +45,7 @@ void draw_board() {
 	}
  
 
-	grid.top_left.x = x;
+	grid.top_left.x = x + 1;
 	grid.top_left.y = y;
 	
 
@@ -59,7 +59,7 @@ void draw_board() {
 
 	int complete_height = 1;
 
-	while (complete_height < grid.height) {
+	while (complete_height + 1 < grid.height) {
 		x = 0;
 		while (x<third_width) {
 			x++;
@@ -89,7 +89,7 @@ void draw_board() {
 	append_buf(&buf, BOTTOM_RIGHT_CORNER, 4);
 	x++;
 
-	grid.bottom_right.x = x;
+	grid.bottom_right.x = x - 1;
 	grid.bottom_right.y = y;
 
 	move_cursor(x, y, &buf);

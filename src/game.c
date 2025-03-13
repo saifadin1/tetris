@@ -22,6 +22,10 @@ int score;
 
 void fall() {
     for(int i=0; ; i++) {
+        log_grid();
+
+
+
         // ctrl-Q for quit
         char c = '\0';
         if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) 
@@ -64,28 +68,23 @@ void fall() {
                         }
                     }
 
-                    process();        
+                    shadow();
+
+                    draw_tetrominoe();
+
                 }
             }
         }
+        process();        
 
         update_grid();
 
         clear_full_rows();
     }
+
 }
 
-void process() {
-    if (can_move_down(&curr_tetrominoe)) {
-        erase_previous_position();
-
-        for (int i = 0; i < 4; i++) {
-            curr_tetrominoe.points[i].y += 1;
-        }
-    }
-
-    shadow();
-
+void draw_tetrominoe() {
     buf_t draw_buf = {NULL, 0};
 
     // color the tetromino
@@ -102,6 +101,21 @@ void process() {
 
     write(STDOUT_FILENO, draw_buf.buf, draw_buf.len);
     free_buf(&draw_buf);
+}
+
+
+void process() {
+    if (can_move_down(&curr_tetrominoe)) {
+        erase_previous_position();
+
+        for (int i = 0; i < 4; i++) {
+            curr_tetrominoe.points[i].y += 1;
+        }
+    }
+
+    shadow();
+
+    draw_tetrominoe();
 }
 
 void erase_previous_position() {
@@ -172,10 +186,10 @@ void update_grid() {
     }
 }
 
-void clear_full_rows() {
+void clear_full_rows() {                                // last two columns are not considered for now
     for (int y = 0; y < grid.height; y++) {
         int full = 1;
-        for (int x = 0; x < grid.width; x++) {
+        for (int x = 0; x + 2 < grid.width; x++) {
             if (grid.cells[y][x] == 0) {
                 full = 0;
                 break;
@@ -188,7 +202,7 @@ void clear_full_rows() {
 
             // Shift everything down straight above the full row
             for (int r = y; r > 0; r--) {
-                for (int c = 0; c < grid.width; c++) {
+                for (int c = 0; c + 2 < grid.width; c++) {
                     grid.cells[r][c] = grid.cells[r - 1][c];
                     if (grid.colors[r - 1][c] != NULL)
                         strcpy(grid.colors[r][c], grid.colors[r - 1][c]);
@@ -196,14 +210,14 @@ void clear_full_rows() {
             }
 
             // Clear the top row
-            for (int c = 0; c < grid.width; c++) {
-                grid.cells[0][c] = 0;
+            for (int c = 1; c + 1 < grid.width; c++) {
+                grid.cells[1][c] = 0;
             }
 
-            buf_t buf = {NULL, 0};
+            buf_t buf = {NULL, 0};            
 
-            for (int r = 0; r < grid.height; r++) {
-                for (int c = 0; c < grid.width; c++) {
+            for (int r = 0; r < grid.height - 1; r++) {
+                for (int c = 0; c + 2 < grid.width; c++) {
                     move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
                     if (grid.cells[r][c] == 1) {
                         if (grid.colors[r][c] != NULL) 

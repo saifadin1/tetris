@@ -25,7 +25,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 2;
             tetrominoe.points[3].x += 0;
             tetrominoe.points[3].y += 3;
-            tetrominoe.color[0] = strdup(CYAN);
+            tetrominoe.color = strdup(CYAN);
             break;
         case 1: // J
             tetrominoe.points[0].x += 0;
