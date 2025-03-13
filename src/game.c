@@ -4,7 +4,7 @@
 #include "../include/grid.h"
 #include "../include/utils.h"
 #include "../include/constants.h"
-// #include "../include/logger.h"
+#include "../include/logger.h"
 #include "../include/screen.h"
 #include <time.h>
 #include <string.h>
@@ -44,16 +44,22 @@ void fall() {
         srand(stime);
         int type = rand() % 7; 
         // printf("type: %d\n", type);
-        curr_tetrominoe = create_tetrominoe(3);
+        curr_tetrominoe = create_tetrominoe(type);
+
+        int rot = 0;
+
 
         while (can_move_down(&curr_tetrominoe)) {            
             process();
+
+
 
             for (int j = 0; j < 90; j++) {
                 struct timeval tv = {0, 10000};
                 fd_set read_fds;
                 FD_ZERO(&read_fds);
                 FD_SET(STDIN_FILENO, &read_fds);
+
 
                 if (select(STDIN_FILENO + 1, &read_fds, NULL, NULL, &tv) > 0) {
                     char buffer[64];
@@ -65,6 +71,7 @@ void fall() {
                             case 'D': move_left(); break;
                             case 'C': move_right(); break;
                             case 'B': drop_fast(); break;
+                            case 'A': rot = 1 , rotate_tetrominoe(&curr_tetrominoe); break;
                         }
                     }
 
@@ -73,13 +80,22 @@ void fall() {
                     draw_tetrominoe();
 
                 }
+
+               
             }
         }
+
+        
+
         process();        
 
+        if (rot) {
+            log_message("rotated");
+        }
         update_grid();
 
         clear_full_rows();
+
     }
 
 }
@@ -152,6 +168,30 @@ void move_right() {
     }
 }
 
+void rotate_tetrominoe(tetrominoe_t *tetrominoe) {    
+    tetrominoe_t temp = *tetrominoe;
+    
+    for (int i=0; i<4; i++) {
+        rotate_point(&temp.points[i].x, &temp.points[i].y, temp.points[0].x, temp.points[0].y);
+    }
+
+
+    // for (int i=0; i<4; i++) {
+    //     if (is_valid_point(temp.points[i].x, temp.points[i].y) == 0) {
+    //         printf("invalid point\n");
+    //         return;
+    //     }
+    // }
+
+    erase_previous_position();
+
+    *tetrominoe = temp;
+
+
+    log_tet(*tetrominoe);
+}
+
+
 void drop_fast() {
     for (int i=0; i<2 && can_move_down(&curr_tetrominoe); i++) {   // make the drop faster by increasing the loop count
         
@@ -177,10 +217,20 @@ int can_move_down(tetrominoe_t *tetrominoe) {
     return 1;
 }
 
+
 void update_grid() {
     for (int i = 0; i < 4; i++) {
         int x , y;
         get_index_in_grid(curr_tetrominoe.points[i].x, curr_tetrominoe.points[i].y, &x, &y);
+
+        char* buffer[64];
+        sprintf(buffer, "x: %d, y: %d", x, y);
+        log_message(buffer);
+
+        // height and width
+        snprintf(buffer, sizeof(buffer), "height: %d, width: %d", grid.height, grid.width);
+        log_message(buffer);
+
         grid.cells[y][x] = 1;
         grid.colors[y][x] = strdup(curr_tetrominoe.color);
     }
@@ -301,3 +351,4 @@ void shadow() {
     write(STDOUT_FILENO, buf.buf, buf.len);
     free_buf(&buf);
 }
+
