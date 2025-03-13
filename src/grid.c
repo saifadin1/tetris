@@ -9,10 +9,11 @@ grid_t grid;
 void init_grid(int width, int height) {
     grid.width = width;
     grid.height = height;
-    grid.colors = malloc(sizeof(char *) * height);
+    grid.colors = malloc(sizeof(char **) * height);
     for (int i = 0; i < height; i++) {
-        grid.colors[i] = malloc(sizeof(char) * width);
+        grid.colors[i] = malloc(sizeof(char *) * width);
         for (int j = 0; j < width; j++) {
+            grid.colors[i][j] = NULL;
         }
     }
     grid.cells = malloc(sizeof(int *) * height); 

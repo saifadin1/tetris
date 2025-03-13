@@ -25,7 +25,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 2;
             tetrominoe.points[3].x += 0;
             tetrominoe.points[3].y += 3;
-            tetrominoe.color = CYAN;
+            tetrominoe.color[0] = strdup(CYAN);
             break;
         case 1: // J
             tetrominoe.points[0].x += 0;
@@ -36,7 +36,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 2;
             tetrominoe.points[3].x += -1;
             tetrominoe.points[3].y += 2;
-            tetrominoe.color = BLUE;
+            tetrominoe.color = strdup(BLUE);
             break;
         case 2: // L
             tetrominoe.points[0].x += 0;
@@ -47,7 +47,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 2;
             tetrominoe.points[3].x += 1;
             tetrominoe.points[3].y += 2;
-            tetrominoe.color = ORANGE;
+            tetrominoe.color = strdup(ORANGE);
             break;
         case 3: // O
             tetrominoe.points[0].x += 0;
@@ -58,7 +58,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 0;
             tetrominoe.points[3].x += 1;
             tetrominoe.points[3].y += 1;
-            tetrominoe.color = YELLOW;
+            tetrominoe.color = strdup(YELLOW);
             break;
         case 4: // S
             tetrominoe.points[0].x += 0;
@@ -69,7 +69,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 1;
             tetrominoe.points[3].x += 1;
             tetrominoe.points[3].y += 0;
-            tetrominoe.color = GREEN;
+            tetrominoe.color = strdup(GREEN);
             break;
         case 5: // T
             tetrominoe.points[0].x += 0;
@@ -80,7 +80,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 0;
             tetrominoe.points[3].x += -1;
             tetrominoe.points[3].y += 0;
-            tetrominoe.color = PURPLE;
+            tetrominoe.color = strdup(PURPLE);
             break;
         case 6: // Z
             tetrominoe.points[0].x += 0;
@@ -91,7 +91,7 @@ tetrominoe_t create_tetrominoe(int type) {
             tetrominoe.points[2].y += 1;
             tetrominoe.points[3].x += 1;
             tetrominoe.points[3].y += 1;
-            tetrominoe.color = RED;
+            tetrominoe.color = strdup(RED);
             break;
         default:
             break;

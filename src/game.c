@@ -40,12 +40,12 @@ void fall() {
         srand(stime);
         int type = rand() % 7; 
         // printf("type: %d\n", type);
-        curr_tetrominoe = create_tetrominoe(type);
+        curr_tetrominoe = create_tetrominoe(3);
 
         while (can_move_down(&curr_tetrominoe)) {            
             process();
 
-            for (int j = 0; j < 50; j++) {
+            for (int j = 0; j < 90; j++) {
                 struct timeval tv = {0, 10000};
                 fd_set read_fds;
                 FD_ZERO(&read_fds);
@@ -168,7 +168,7 @@ void update_grid() {
         int x , y;
         get_index_in_grid(curr_tetrominoe.points[i].x, curr_tetrominoe.points[i].y, &x, &y);
         grid.cells[y][x] = 1;
-        grid.colors[y][x] = curr_tetrominoe.color;
+        grid.colors[y][x] = strdup(curr_tetrominoe.color);
     }
 }
 
@@ -190,6 +190,8 @@ void clear_full_rows() {
             for (int r = y; r > 0; r--) {
                 for (int c = 0; c < grid.width; c++) {
                     grid.cells[r][c] = grid.cells[r - 1][c];
+                    if (grid.colors[r - 1][c] != NULL)
+                        strcpy(grid.colors[r][c], grid.colors[r - 1][c]);
                 }
             }
 
@@ -200,21 +202,20 @@ void clear_full_rows() {
 
             buf_t buf = {NULL, 0};
 
-            append_buf(&buf, grid.colors[y], strlen(grid.colors[y]));
             for (int r = 0; r < grid.height; r++) {
                 for (int c = 0; c < grid.width; c++) {
+                    move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
                     if (grid.cells[r][c] == 1) {
-                        move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
+                        if (grid.colors[r][c] != NULL) 
+                            append_buf(&buf, grid.colors[r][c], strlen(grid.colors[r][c]));
                         append_buf(&buf, BLOCK_CHAR, 4);
+                        append_buf(&buf, RESET, 4);
                     } else {
-                        move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
                         append_buf(&buf, " ", 1);
                     }
                 }
             }
 
-            // reset color
-            append_buf(&buf, RESET, 4);
             write(STDOUT_FILENO, buf.buf, buf.len);
             free_buf(&buf);
         }

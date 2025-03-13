@@ -9,7 +9,7 @@ typedef struct {
 
 
 typedef struct {
-    char **colors;
+    char ***colors;
     int **cells;
     point_t top_left;
     point_t bottom_right;
