@@ -1,4 +1,5 @@
 #include "../include/grid.h"
+#include "../include/constants.h"
 #include <stdlib.h>
 
 
@@ -13,7 +14,7 @@ void init_grid(int width, int height) {
     for (int i = 0; i < height; i++) {
         grid.colors[i] = malloc(sizeof(char *) * width);
         for (int j = 0; j < width; j++) {
-            grid.colors[i][j] = NULL;
+            grid.colors[i][j] = WHITE;
         }
     }
     grid.cells = malloc(sizeof(int *) * height); 

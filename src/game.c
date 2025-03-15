@@ -89,9 +89,6 @@ void fall() {
 
         process();        
 
-        if (rot) {
-            log_message("rotated");
-        }
         update_grid();
 
         clear_full_rows();
@@ -175,20 +172,32 @@ void rotate_tetrominoe(tetrominoe_t *tetrominoe) {
         rotate_point(&temp.points[i].x, &temp.points[i].y, temp.points[0].x, temp.points[0].y);
     }
 
+    for (int i=0; i<4; i++) {
+        int x_index, y_index;
+        get_index_in_grid(temp.points[i].x, temp.points[i].y, &x_index, &y_index);
+        // if out of right boundary , then i should move left
+        if (temp.points[i].x >= grid.bottom_right.x) {
+            move_left();
+            // try rotate again 
+            rotate_tetrominoe(tetrominoe);
+            return;
+        }
+        // if out of left boundary , then i should move right
+        if (temp.points[i].x < grid.top_left.x) {
+            move_right();
+            rotate_tetrominoe(tetrominoe);
+            return;
+        }
+    }
 
-    // for (int i=0; i<4; i++) {
-    //     if (is_valid_point(temp.points[i].x, temp.points[i].y) == 0) {
-    //         printf("invalid point\n");
-    //         return;
-    //     }
-    // }
+    // double check if the new position is valid
+    for (int i=0; i<4; i++) {
+        if (is_valid_point(temp.points[i].x, temp.points[i].y) == 0) return;
+    }
 
     erase_previous_position();
 
     *tetrominoe = temp;
-
-
-    log_tet(*tetrominoe);
 }
 
 
@@ -223,14 +232,6 @@ void update_grid() {
         int x , y;
         get_index_in_grid(curr_tetrominoe.points[i].x, curr_tetrominoe.points[i].y, &x, &y);
 
-        char* buffer[64];
-        sprintf(buffer, "x: %d, y: %d", x, y);
-        log_message(buffer);
-
-        // height and width
-        snprintf(buffer, sizeof(buffer), "height: %d, width: %d", grid.height, grid.width);
-        log_message(buffer);
-
         grid.cells[y][x] = 1;
         grid.colors[y][x] = strdup(curr_tetrominoe.color);
     }
@@ -250,15 +251,18 @@ void clear_full_rows() {                                // last two columns are 
             // increase the score
             increase_score();
 
+            
             // Shift everything down straight above the full row
-            for (int r = y; r > 0; r--) {
-                for (int c = 0; c + 2 < grid.width; c++) {
-                    grid.cells[r][c] = grid.cells[r - 1][c];
-                    if (grid.colors[r - 1][c] != NULL)
-                        strcpy(grid.colors[r][c], grid.colors[r - 1][c]);
+            for (int r = y; r > 0; r--) { 
+                for (int c = 0; c + 2 < grid.width; c++) { 
+                    if (r - 1 >= 0) { 
+                        grid.cells[r][c] = grid.cells[r - 1][c]; 
+                    }
                 }
             }
-
+            
+            
+            // log_message("full row");
             // Clear the top row
             for (int c = 1; c + 1 < grid.width; c++) {
                 grid.cells[1][c] = 0;
@@ -266,6 +270,7 @@ void clear_full_rows() {                                // last two columns are 
 
             buf_t buf = {NULL, 0};            
 
+            // Draw the grid
             for (int r = 0; r < grid.height - 1; r++) {
                 for (int c = 0; c + 2 < grid.width; c++) {
                     move_cursor(grid.top_left.x + c, grid.top_left.y + r, &buf);
@@ -288,7 +293,6 @@ void clear_full_rows() {                                // last two columns are 
 
 void increase_score() {
     score++;
-
 
     buf_t buf = {NULL, 0};
     move_cursor(0, screen_height - 1, &buf);

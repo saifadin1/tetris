@@ -25,6 +25,18 @@
 #define RESET "\033[0m"     
 
 
+// background colors
+#define BG_BLACK "\033[40m"
+#define BG_RED "\033[41m"
+#define BG_GREEN "\033[42m"
+#define BG_YELLOW "\033[43m"
+#define BG_BLUE "\033[44m"
+#define BG_ORANGE "\033[45m"
+#define BG_PURPLE "\033[45m"
+#define BG_CYAN "\033[46m"
+#define BG_WHITE "\033[47m"
+#define BG_RESET "\033[49m"
+
 
 
 
