@@ -5,7 +5,7 @@
 extern tetrominoe_t curr_tetrominoe;
 extern int score;
 
-void fall();
+int fall();
 int can_move_down(tetrominoe_t *tetrominoe);
 void update_grid();
 void move_left();

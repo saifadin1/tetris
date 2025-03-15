@@ -20,8 +20,8 @@ tetrominoe_t curr_tetrominoe;
 tetrominoe_t shadow_tetrominoe;
 int score;
 
-void fall() {
-    for(int i=0; ; i++) {
+int fall() {
+    for(int i=0; !game_over() ; i++) {
         log_grid();
 
 
@@ -95,6 +95,8 @@ void fall() {
 
     }
 
+    // game over time to update the high score
+    return save_high_score(score);
 }
 
 void draw_tetrominoe() {
@@ -356,3 +358,12 @@ void shadow() {
     free_buf(&buf);
 }
 
+int game_over() {
+    // if the first row is not clear, then the game is over
+    for (int i = 0; i < grid.width - 2; i++) {
+        if (grid.cells[0][i] == 1) {
+            return 1;
+        }
+    }
+    return 0;
+}

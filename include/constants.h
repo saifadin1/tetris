@@ -47,3 +47,4 @@
 #define DOWN_ARROW "\x1B[B"
 #define RIGHT_ARROW "\x1B[C"
 #define LEFT_ARROW "\x1B[D"
+#define ENTER "\n"

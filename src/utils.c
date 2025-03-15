@@ -4,6 +4,7 @@
 #include "../include/logger.h"
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 
 void move_cursor(int x, int y, buf_t *buf) {
@@ -44,4 +45,18 @@ void rotate_point(int *x, int *y, int pivot_x, int pivot_y) {
     int new_y = *y - pivot_y;
     *x = pivot_x - new_y;
     *y = pivot_y + new_x;
+}
+
+void usage() {
+    buf_t buf = {NULL, 0};
+    
+    // move cursor to the buttom left corner
+    move_cursor(0, 140, &buf);
+
+
+
+    append_buf(&buf, "Type 's' to start a new game\n\r", strlen("Type 's' to start a new game\n\r"));
+    append_buf(&buf, "Type 'q' to quit the game\n", strlen("Type 'q' to quit the game\n"));
+    write(STDOUT_FILENO, buf.buf, buf.len);
+    free_buf(&buf);
 }

@@ -40,3 +40,30 @@ void log_message(const char *msg) {
     fprintf(f, "%s\n", msg);
     fclose(f);
 }
+
+int save_high_score(int score) {
+    FILE *f = fopen("log/hs.txt", "w");
+    int curr_score = load_high_score();
+    if (curr_score < score) {
+        fprintf(f, "%d", score);
+        fclose(f);
+        return score; // new high score
+    } else {
+        fprintf(f, "%d", curr_score);
+        fclose(f);
+        return 0;
+    }
+}
+
+int load_high_score() {
+    FILE *f = fopen("log/hs.txt", "r");
+    if (f == NULL) {
+        perror("fopen");
+        return 0;
+    }
+    int score;
+    fscanf(f, "%d", &score);
+    fclose(f);
+    return score;
+}
+
