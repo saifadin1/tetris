@@ -12,11 +12,11 @@ make
 
 ### Controls 
 
-`CTRL-Q` for quit
-`up-arrow` for rotation
-`left-arrow` for moving left
-`right-arrow` for moving right
-`down-arrow` for soft drop
+* `CTRL-Q` for quit
+* `up-arrow` for rotation
+* `left-arrow` for moving left
+* `right-arrow` for moving right
+* `down-arrow` for soft drop
 
 
 ### TODO:
