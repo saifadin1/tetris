@@ -3,12 +3,20 @@
 
 ## Usage
 
-#### Build the game 
+### Build the game 
 
 ``` sh
 make
 ./build/tetris
 ```
+
+### Controls 
+
+`CTRL-Q` for quit
+`up-arrow` for rotation
+`left-arrow` for moving left
+`right-arrow` for moving right
+`down-arrow` for soft drop
 
 
 ### TODO:
