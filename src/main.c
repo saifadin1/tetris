@@ -5,6 +5,7 @@
 #include "../include/constants.h"
 #include "../include/utils.h"
 #include "../include/buf.h"
+#include "../include/logger.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -15,7 +16,6 @@ int main(void) {
     atexit(raw_mode_off);
 
     usage();
-
 
     while (1) {
         char c = '\0';
@@ -32,6 +32,9 @@ int main(void) {
             init_grid(10 + 2, 20 + 1);
             draw_board();
             int is_high_score = fall();
+            char log[64];
+            sprintf(log, "score: %d\n", is_high_score);
+            log_message(log);
             char * msg;
             if (is_high_score) {
                 asprintf(&msg, "New high score: %d\n\r", is_high_score); 

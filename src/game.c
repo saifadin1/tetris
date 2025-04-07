@@ -18,10 +18,10 @@
 
 tetrominoe_t curr_tetrominoe;
 tetrominoe_t shadow_tetrominoe;
-int score;
+int score, level;
 
 int fall() {
-    for(int i=0; !game_over() ; i++) {
+    for(int i=0; !game_over() ; i++, level = (i + 1) / 5) {
         log_grid();
 
 
@@ -54,7 +54,7 @@ int fall() {
 
 
 
-            for (int j = 0; j < 90; j++) {
+            for (int j = 0; j < 100 + level * 10; j++) {   // 100 * 10000 micro seconds
                 struct timeval tv = {0, 10000};
                 fd_set read_fds;
                 FD_ZERO(&read_fds);
@@ -76,12 +76,8 @@ int fall() {
                     }
 
                     shadow();
-
                     draw_tetrominoe();
-
                 }
-
-               
             }
         }
 

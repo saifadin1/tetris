@@ -92,8 +92,6 @@ void draw_board() {
 	grid.bottom_right.x = x - 1;
 	grid.bottom_right.y = y;
 
-	move_cursor(x, y, &buf);
-	append_buf(&buf, "here", 4);
 
 	move_cursor(0, screen_height - 1, &buf);
 	append_buf(&buf, "Score: 0", strlen("Score: 0"));

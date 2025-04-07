@@ -42,8 +42,8 @@ void log_message(const char *msg) {
 }
 
 int save_high_score(int score) {
-    FILE *f = fopen("log/hs.txt", "w");
     int curr_score = load_high_score();
+    FILE *f = fopen("log/hs.txt", "w");
     if (curr_score < score) {
         fprintf(f, "%d", score);
         fclose(f);

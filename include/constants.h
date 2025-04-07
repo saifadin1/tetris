@@ -3,14 +3,21 @@
 
 // escape sequences
 #define HORIZONTAL_BAR "\u2500"
-#define VERTICAL_BAR "\u2551"
-#define TOP_LEFT_CORNER "\u250C"
+// #define VERTICAL_BAR "\u2551"
+
+
+
+#define VERTICAL_BAR "\u2502" 
+#define TOP_LEFT_CORNER "\u256d"
 #define TOP_RIGHT_CORNER "\u2510"
 #define BOTTOM_LEFT_CORNER "\u2514"
 #define BOTTOM_RIGHT_CORNER "\u2518"
-#define BLOCK_CHAR "\U0001F02B"
 #define SHADE_CHAR "\U0001F006"
+// #define BLOCK_CHAR "\U0001F02B"
 // #define BLOCK_CHAR "R"
+#define BLOCK_CHAR "\U0001F02B"
+// #define BLOCK_CHAR "\u23F9"
+
 
 
 // colors
