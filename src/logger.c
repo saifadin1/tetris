@@ -58,7 +58,6 @@ int save_high_score(int score) {
 int load_high_score() {
     FILE *f = fopen("log/hs.txt", "r");
     if (f == NULL) {
-        perror("fopen");
         return 0;
     }
     int score;
