@@ -358,6 +358,7 @@ int game_over() {
     // if the first row is not clear, then the game is over
     for (int i = 0; i < grid.width - 2; i++) {
         if (grid.cells[0][i] == 1) {
+            score = 0;
             return 1;
         }
     }
